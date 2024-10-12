@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2D Cartesian Function Plotter</title>
+    <!-- Inclusione di Plotly -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <!-- Inclusione di math.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/9.4.4/math.min.js"></script>
+</head>
+<body>
+    <h1>2D Cartesian Function Plotter</h1>
+    <!-- Campo di input per inserire la funzione -->
+    <input type="text" id="functionInput" placeholder="Enter a function (e.g. y = x^2 or x = y^2)">
+    <button onclick="plotFunction()">Plot Function</button>
+
+    <!-- Area per il grafico -->
+    <div id="plot" style="width:600px;height:400px;"></div>
+
+    <script>
+        function plotFunction() {
+            const input = document.getElementById('functionInput').value.trim();
+            let expression, variable, rangeMin = -10, rangeMax = 10, step = 0.1;
+
+            if (input.includes("y=")) {
+                // Funzione in termini di y, es: y = f(x)
+                expression = input.replace("y=", "").trim();
+                variable = "x";
+            } else if (input.includes("x=")) {
+                // Funzione in termini di x, es: x = f(y)
+                expression = input.replace("x=", "").trim();
+                variable = "y";
+            } else {
+                alert("Please enter the function as 'y = ...' or 'x = ...'");
+                return;
+            }
+
+            try {
+                const func = math.compile(expression);
+                const valuesX = [];
+                const valuesY = [];
+
+                if (variable === "x") {
+                    // Traccia la funzione come y = f(x)
+                    for (let x = rangeMin; x <= rangeMax; x += step) {
+                        const y = func.evaluate({ x: x });
+                        valuesX.push(x);
+                        valuesY.push(y);
+                    }
+                } else if (variable === "y") {
+                    // Traccia la funzione come x = f(y)
+                    for (let y = rangeMin; y <= rangeMax; y += step) {
+                        const x = func.evaluate({ y: y });
+                        valuesX.push(x);
+                        valuesY.push(y);
+                    }
+                }
+
+                // Traccia i valori su un grafico cartesiano 2D
+                const trace = {
+                    x: valuesX, // Asse x
+                    y: valuesY, // Asse y
+                    mode: 'lines',
+                    type: 'scatter'
+                };
+
+                const layout = {
+                    title: `Graph of ${input}`,
+                    xaxis: { title: 'x' },
+                    yaxis: { title: 'y', automargin: true, titlefont: { size: 18 }, tickangle: -45 }, // Etichetta in alto sull'asse y
+                    showlegend: false
+                };
+
+                Plotly.newPlot('plot', [trace], layout);
+            } catch (error) {
+                alert('Invalid function! Please enter a valid function.');
+            }
+        }
+    </script>
+</body>
+</html>
